@@ -1,9 +1,10 @@
 #include "Wire.h"
+#include "Tca9548a.h"
 
 #define TOTALSENSOR_I2C_ADDR 0x28
 #define DIFFSENSOR_I2C_ADDR 0x38
-#define TCA_I2C_ADDR 0x70
 
+TCA9548A i2cSwitch(&Wire);
 
 // Create array of raw pressure values
 uint16_t pressureRaw[3];
@@ -13,15 +14,6 @@ uint16_t temperatureRaw[2];
 double pressure[3];
 // Create array of temperature values
 float temperature[2];
-
-// Function to control TCA9548A
-void tcaselect(uint8_t i) {
-  if (i > 7) return;
-
-  Wire.beginTransmission(TCA_I2C_ADDR);
-  Wire.write(1 << i);
-  Wire.endTransmission();
-}
 
 // Function to read raw pressure value
 // The function returns 0 when the status returned by the sensor differs from 0
@@ -138,7 +130,7 @@ void setup() {
 
   // Check that devices are present
   // Check at first port
-  tcaselect(1);
+  i2cSwitch.selectChannel(1);
   Wire.beginTransmission(DIFFSENSOR_I2C_ADDR);
   byte busStatus = Wire.endTransmission();
   if (busStatus != 0x00) {
@@ -146,7 +138,7 @@ void setup() {
   }
 
   // Check at second I2C
-  tcaselect(2);
+  i2cSwitch.selectChannel(2);
   Wire.beginTransmission(DIFFSENSOR_I2C_ADDR);
   busStatus = Wire.endTransmission();
   if (busStatus != 0x00) {
@@ -156,11 +148,11 @@ void setup() {
 
 void loop() {
   // Read raw pressure values from sensors at hardware I2C
-  tcaselect(1);
+  i2cSwitch.selectChannel(1);
   pressureRaw[0] = readRawTotPressure();
   pressureRaw[1] = readRawDiffPressure();
   temperatureRaw[0] = readRawDiffTemperature();
-  tcaselect(2);
+  i2cSwitch.selectChannel(2);
   pressureRaw[2] = readRawDiffPressure();
   temperatureRaw[1] = readRawDiffTemperature();
   //convert the Raw pressures and temperatures to pressure values in mbar and temperature values in °C
