@@ -23,6 +23,13 @@ Enter the container and build our sketch
 
 ```
 docker exec -it arduino_builder bash
-cd /home/Read3Sensors
-arduino-cli compile
+> cd /home/Read3Sensors
+root@container:/home/Read3Sensors> arduino-cli -b Seeeduino:samd:seeed_XIAO_m0 compile
+```
+
+To upload our sketch run your container with the `--device=/dev/ttyXXX` option and use
+
+```
+root@container:/home/Read3Sensors> arduino-cli -b Seeeduino:samd:seeed_XIAO_m0 compile
+root@container:/home/Read3Sensors> arduino-cli -b Seeeduino:samd:seeed_XIAO_m0 upload --port=/dev/ttyXXX
 ```
