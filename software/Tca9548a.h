@@ -5,9 +5,8 @@
 #include <Wire.h>
 
 class TCA9548A {
-public:
-    TCA9548A(TwoWire *i2c)
-        :_i2c(i2c){};
+  public:
+    TCA9548A(TwoWire *i2c) : _i2c(i2c){};
 
     void selectChannel(uint8_t channel);
 
