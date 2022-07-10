@@ -12,7 +12,7 @@ class TCA9548A {
 
   private:
     static constexpr int TCA9548A_I2C_ADDRESS = 0x70;
-    
+
     TwoWire *_i2c;
 };
 

@@ -9,7 +9,7 @@ bool AllSensorsELVH::fetchPressureValues() {
     const uint8_t lsb = _i2c->read();
 
     _pressureRaw = 0x3FFF & ((msb << 8) | lsb);
-    
+
     const uint8_t stat = msb >> 6;
 
     return stat == 0;

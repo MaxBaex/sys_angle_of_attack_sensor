@@ -14,7 +14,7 @@ class BPS120 {
 
   private:
     static constexpr int BPS120_I2C_ADDRESS = 0x28;
-    
+
     TwoWire *_i2c;
     uint16_t _pressureRaw{0.0f};
 };

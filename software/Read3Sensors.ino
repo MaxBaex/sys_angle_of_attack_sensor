@@ -1,6 +1,6 @@
-#include "Tca9548a.h"
-#include "BPS120.h"
 #include "AllSensorsELV.h"
+#include "BPS120.h"
+#include "Tca9548a.h"
 #include "Wire.h"
 
 #define DIFFSENSOR_I2C_ADDR 0x38
@@ -51,15 +51,25 @@ void loop() {
     pressure[0] =
         ((float)absPressureSensor.getPressureRaw() * 68.1 / 16383 - 33.6) * 30 /
         11.8748;
-    pressure[1] = ((((float)diffPressureSensor1.getPressureRaw()) * (50) / (16383)) - 24.90) / 0.8;
-    pressure[2] = ((((float)diffPressureSensor1.getPressureRaw()) * (50) / (16383)) - 24.96) / 0.8;
+    pressure[1] =
+        ((((float)diffPressureSensor1.getPressureRaw()) * (50) / (16383)) -
+         24.90) /
+        0.8;
+    pressure[2] =
+        ((((float)diffPressureSensor1.getPressureRaw()) * (50) / (16383)) -
+         24.96) /
+        0.8;
 
     // temperature formula after kalibration
 
     temperature[0] =
-        ((float)diffPressureSensor1.getTemperatureRaw() * 50 / 2047 - 51.552699387) / 1.06687116;
+        ((float)diffPressureSensor1.getTemperatureRaw() * 50 / 2047 -
+         51.552699387) /
+        1.06687116;
     temperature[1] =
-        ((float)diffPressureSensor2.getTemperatureRaw() * 50 / 2047 - 51.552699387) / 1.06687116;
+        ((float)diffPressureSensor2.getTemperatureRaw() * 50 / 2047 -
+         51.552699387) /
+        1.06687116;
 
     Serial.print("Pressure measurements [mbar]: ");
     Serial.print(pressure[0], 4);

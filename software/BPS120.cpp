@@ -9,13 +9,10 @@ bool BPS120::fetchSensorValues() {
     const uint8_t lsb = _i2c->read();
 
     _pressureRaw = 0x3FFF & ((msb << 8) | lsb);
-    
+
     const uint8_t stat = msb >> 6;
 
     return stat == 0;
 }
 
-uint16_t BPS120::getPressureRaw() {
-    return _pressureRaw;
-}
-
+uint16_t BPS120::getPressureRaw() { return _pressureRaw; }
