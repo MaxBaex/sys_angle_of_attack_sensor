@@ -1,9 +1,7 @@
 #include "AllSensorsELV.h"
 #include "BPS120.h"
 #include "Tca9548a.h"
-#include "Wire.h"
-
-#define DIFFSENSOR_I2C_ADDR 0x38
+#include <Wire.h>
 
 TCA9548A i2cSwitch(&Wire);
 BPS120 absPressureSensor(&Wire);
@@ -23,17 +21,13 @@ void setup() {
     // Check that devices are present
     // Check at first port
     i2cSwitch.selectChannel(1);
-    Wire.beginTransmission(DIFFSENSOR_I2C_ADDR);
-    byte busStatus = Wire.endTransmission();
-    if (busStatus != 0x00) {
+    if (!diffPressureSensor1.isPresent()) {
         Serial.println("I2C Bus Error/Device not Found!");
     }
 
     // Check at second I2C
     i2cSwitch.selectChannel(2);
-    Wire.beginTransmission(DIFFSENSOR_I2C_ADDR);
-    busStatus = Wire.endTransmission();
-    if (busStatus != 0x00) {
+    if (!diffPressureSensor2.isPresent()) {
         Serial.println("I2C Bus Error/Device not Found!");
     }
 }

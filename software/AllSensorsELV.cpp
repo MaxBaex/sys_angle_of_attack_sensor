@@ -2,6 +2,13 @@
 
 AllSensorsELVH::AllSensorsELVH(TwoWire *i2c) : _i2c(i2c) {}
 
+bool AllSensorsELVH::isPresent() {
+    _i2c->beginTransmission(I2C_ADRESS);
+    uint8_t busStatus = _i2c->endTransmission();
+
+    return busStatus == 0x00;
+}
+
 bool AllSensorsELVH::fetchPressureValues() {
     _i2c->requestFrom(I2C_ADRESS, 2);
 
