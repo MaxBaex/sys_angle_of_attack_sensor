@@ -13,5 +13,8 @@ RUN chmod a+x install.sh && ./install.sh
 # install seeduino xiao (samd) support
 RUN arduino-cli core install --additional-urls https://files.seeedstudio.com/arduino/package_seeeduino_boards_index.json Seeeduino:samd
 
+# install SD library
+RUN arduino-cli lib install SD
+
 # install FreeRTOS for SAMD21
 RUN arduino-cli lib install FreeRTOS_SAMD21

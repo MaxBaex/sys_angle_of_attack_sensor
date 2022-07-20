@@ -1,7 +1,11 @@
 #include "AllSensorsELV.h"
 #include "BPS120.h"
 #include "Tca9548a.h"
+#include <SD.h>
+#include <SPI.h>
 #include <Wire.h>
+
+#define SPI_CS_PIN 3
 
 TCA9548A i2cSwitch(&Wire);
 BPS120 absPressureSensor(&Wire);
@@ -13,6 +17,10 @@ double pressure[3];
 // Create array of temperature values
 float temperature[2];
 
+inline void stop() {
+    while (1);
+}
+
 void setup() {
     Wire.begin();
 
@@ -23,12 +31,19 @@ void setup() {
     i2cSwitch.selectChannel(1);
     if (!diffPressureSensor1.isPresent()) {
         Serial.println("I2C Bus Error/Device not Found!");
+        stop();
     }
 
     // Check at second I2C
     i2cSwitch.selectChannel(2);
     if (!diffPressureSensor2.isPresent()) {
         Serial.println("I2C Bus Error/Device not Found!");
+        stop();
+    }
+
+    if (!SD.begin(SPI_CS_PIN)) {
+        Serial.println("SD Card failed, or not present");
+        stop();
     }
 }
 
@@ -65,18 +80,37 @@ void loop() {
          51.552699387) /
         1.06687116;
 
-    Serial.print("Pressure measurements [mbar]: ");
-    Serial.print(pressure[0], 4);
-    Serial.print(" and ");
-    Serial.print(pressure[1], 4);
-    Serial.print(" and ");
-    Serial.print(pressure[2], 4);
-    Serial.println("");
-    Serial.print("Temperature measruements [°C]: ");
-    Serial.print(temperature[0]);
-    Serial.print(" and ");
-    Serial.print(temperature[1]);
-    Serial.println();
+    File dataFile = SD.open("datalog2.txt", FILE_WRITE);
+
+    if (dataFile) {
+        dataFile.print("Pressure measurements [mbar]: ");
+        dataFile.print(pressure[0], 4);
+        dataFile.print(" and ");
+        dataFile.print(pressure[1], 4);
+        dataFile.print(" and ");
+        dataFile.print(pressure[2], 4);
+        dataFile.println("");
+        dataFile.print("Temperature measruements [°C]: ");
+        dataFile.print(temperature[0]);
+        dataFile.print(" and ");
+        dataFile.print(temperature[1]);
+        dataFile.println();
+        dataFile.close();
+        Serial.println("Wrote two lines into file :)");
+    } else {
+        Serial.print("Pressure measurements [mbar]: ");
+        Serial.print(pressure[0], 4);
+        Serial.print(" and ");
+        Serial.print(pressure[1], 4);
+        Serial.print(" and ");
+        Serial.print(pressure[2], 4);
+        Serial.println("");
+        Serial.print("Temperature measruements [°C]: ");
+        Serial.print(temperature[0]);
+        Serial.print(" and ");
+        Serial.print(temperature[1]);
+        Serial.println();
+    }
 
     delay(1000);
 }
