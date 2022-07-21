@@ -1,11 +1,13 @@
 #include "AllSensorsELV.h"
 #include "BPS120.h"
 #include "Tca9548a.h"
+#include "DataLogging.h"
 #include <SD.h>
-#include <SPI.h>
 #include <Wire.h>
+#include <cstring>
 
-#define SPI_CS_PIN 3
+constexpr char logFileHeader[] = "timeStamp, absolutePressure, diffPressure1, diffPressure2, temp1, temp2\n";
+constexpr char logFileDataTemplate[] = "% 10d % 1.5e, % 1.5e, % 1.5e, % 1.5e, % 1.5e\n";
 
 TCA9548A i2cSwitch(&Wire);
 BPS120 absPressureSensor(&Wire);
@@ -17,8 +19,11 @@ double pressure[3];
 // Create array of temperature values
 float temperature[2];
 
-inline void stop() {
-    while (1);
+inline void stop(char *err) {
+    while (1) {
+        Serial.println(err);
+        delay(1000);
+    }
 }
 
 void setup() {
@@ -30,21 +35,22 @@ void setup() {
     // Check at first port
     i2cSwitch.selectChannel(1);
     if (!diffPressureSensor1.isPresent()) {
-        Serial.println("I2C Bus Error/Device not Found!");
-        stop();
+        stop("I2C Bus Error/Device not Found!");
     }
 
     // Check at second I2C
     i2cSwitch.selectChannel(2);
     if (!diffPressureSensor2.isPresent()) {
-        Serial.println("I2C Bus Error/Device not Found!");
-        stop();
+        stop("I2C Bus Error/Device not Found!");
     }
 
-    if (!SD.begin(SPI_CS_PIN)) {
-        Serial.println("SD Card failed, or not present");
-        stop();
+    delay(5000);
+
+    if (!initializeLogging()) {
+        stop("Data logging could not be initialized");
     }
+
+    storeData(logFileHeader, strlen(logFileHeader));
 }
 
 void loop() {
@@ -54,6 +60,8 @@ void loop() {
     diffPressureSensor1.fetchPressureAndTempValues();
     i2cSwitch.selectChannel(2);
     diffPressureSensor2.fetchPressureAndTempValues();
+
+    unsigned long timestamp = millis();
 
     // convert the Raw pressures and temperatures to pressure values in mbar and
     // temperature values in °C
@@ -80,37 +88,22 @@ void loop() {
          51.552699387) /
         1.06687116;
 
-    File dataFile = SD.open("datalog2.txt", FILE_WRITE);
+    char buffer[89] = "";
+    snprintf(buffer, 89, logFileDataTemplate, timestamp, pressure[0], pressure[1], pressure[2], temperature[0], temperature[1]);
+    storeData(buffer, strlen(buffer));
 
-    if (dataFile) {
-        dataFile.print("Pressure measurements [mbar]: ");
-        dataFile.print(pressure[0], 4);
-        dataFile.print(" and ");
-        dataFile.print(pressure[1], 4);
-        dataFile.print(" and ");
-        dataFile.print(pressure[2], 4);
-        dataFile.println("");
-        dataFile.print("Temperature measruements [°C]: ");
-        dataFile.print(temperature[0]);
-        dataFile.print(" and ");
-        dataFile.print(temperature[1]);
-        dataFile.println();
-        dataFile.close();
-        Serial.println("Wrote two lines into file :)");
-    } else {
-        Serial.print("Pressure measurements [mbar]: ");
-        Serial.print(pressure[0], 4);
-        Serial.print(" and ");
-        Serial.print(pressure[1], 4);
-        Serial.print(" and ");
-        Serial.print(pressure[2], 4);
-        Serial.println("");
-        Serial.print("Temperature measruements [°C]: ");
-        Serial.print(temperature[0]);
-        Serial.print(" and ");
-        Serial.print(temperature[1]);
-        Serial.println();
-    }
+    Serial.print("Pressure measurements [mbar]: ");
+    Serial.print(pressure[0], 4);
+    Serial.print(" and ");
+    Serial.print(pressure[1], 4);
+    Serial.print(" and ");
+    Serial.print(pressure[2], 4);
+    Serial.println("");
+    Serial.print("Temperature measurements [°C]: ");
+    Serial.print(temperature[0]);
+    Serial.print(" and ");
+    Serial.print(temperature[1]);
+    Serial.println();
 
-    delay(1000);
+    delay(50);
 }
