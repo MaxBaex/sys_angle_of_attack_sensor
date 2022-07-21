@@ -16,5 +16,9 @@ RUN arduino-cli core install --additional-urls https://files.seeedstudio.com/ard
 # install SD library
 RUN arduino-cli lib install SD
 
-# install FreeRTOS for SAMD21
-RUN arduino-cli lib install FreeRTOS_SAMD21
+# ugly patching of Seeeduino's FreeRTOS
+# previous version had a byte alignment issue, causing problems with sprintf
+RUN apt-get install -y unzip
+ADD https://github.com/Seeed-Studio/Seeed_Arduino_FreeRTOS/archive/e4847b697c5062dd21cdda6235640897988ff663.zip FreeRTOS_SAMD21.zip
+RUN rm -rf /root/.arduino15/packages/Seeeduino/hardware/samd/1.8.3/libraries/Seeed_Arduino_FreeRTOS && unzip FreeRTOS_SAMD21.zip && mv Seeed_Arduino_FreeRTOS-e4847b697c5062dd21cdda6235640897988ff663 /root/.arduino15/packages/Seeeduino/hardware/samd/1.8.3/libraries/Seeed_Arduino_FreeRTOS
+

@@ -2,8 +2,8 @@
 #include <SD.h>
 #include <SPI.h>
 
-#define STR1(x)  #x
-#define STR(x)  STR1(x)
+#define STR1(x) #x
+#define STR(x) STR1(x)
 
 #define SPI_CS_PIN 3
 #define LOG_NUM_DIGITS 3
@@ -15,11 +15,11 @@ static int logNum = 0;
 int determineLogNum() {
     const int maxLogNum = LOG_NUM_DIGITS * 10 - 1;
 
-    for (int i=0; i<=maxLogNum - 1; i++) {
+    for (int i = 0; i <= maxLogNum - 1; i++) {
         char logFileName[11] = "";
         snprintf(logFileName, 11, LOG_FILE_NAME_TEMPLATE, i);
 
-        if(!SD.exists(logFileName)) {
+        if (!SD.exists(logFileName)) {
             return i;
         }
     }
@@ -47,7 +47,9 @@ void storeData(const void *data, size_t dataSize) {
 
     File dataFile = SD.open(logFileName, FILE_WRITE);
 
-    dataFile.write((const char*)data, dataSize);
+    if (dataFile) {
+        dataFile.write((const char *)data, dataSize);
 
-    dataFile.close();
+        dataFile.close();
+    }
 }
