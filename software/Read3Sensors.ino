@@ -1,5 +1,6 @@
 #include "DataLogging.h"
 #include "DataAcquisition.h"
+#include "StatusIndication.h"
 #include <SD.h>
 #include <Seeed_Arduino_FreeRTOS.h>
 #include <cmath>
@@ -9,8 +10,11 @@ static constexpr size_t queueLen = 10;
 static constexpr size_t msgLen = 80;
 
 DataLogging logging(dataFileHeader);
-DataAcquisition acquisition(pdMS_TO_TICKS(1000), &logging);
+DataAcquisition acquisition(pdMS_TO_TICKS(100), &logging);
 
+const Task *tasklist[] = {(Task*)&logging, (Task*)&acquisition};
+
+StatusIndication statusIndicator(tasklist, sizeof(tasklist)/sizeof(tasklist[0]));
 
 inline void stop(char *err) {
     while (1) {
@@ -32,6 +36,8 @@ void setup() {
     if (!logging.begin(queueLen, msgLen)) {
         stop("Data logging could not be initialized");
     }
+
+    statusIndicator.begin();
 
     vTaskStartScheduler();
 }

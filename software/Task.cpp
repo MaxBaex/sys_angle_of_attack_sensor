@@ -15,6 +15,10 @@ void Task::run() {
     }
 }
 
+void Task::setHealthy(bool healthy) {
+        _healthy = healthy;
+}
+
 void Task::runStatic(void *pvParameters) {
     Task *instance = (Task*)pvParameters;
     

@@ -27,7 +27,7 @@ bool DataLogging::begin(UBaseType_t queueLength, UBaseType_t queueItemSize) {
 
     _queueItemSize = queueItemSize;
 
-    return Task::begin("DataLogging", 1, 512);
+    return Task::begin("DataLogging", 2, 350);
 }
 
 void DataLogging::run() {
@@ -39,6 +39,7 @@ void DataLogging::run() {
         const auto res = xQueueReceive(loggingQueue, &tmpString[cursor], pdMS_TO_TICKS(1000));
 
         if (res != pdTRUE) {
+            setHealthy(false);
             continue;
         }
 
@@ -47,10 +48,13 @@ void DataLogging::run() {
         const bool wroteLastFittingElement = cursor + _queueItemSize > STR_CACHE_SIZE;
 
         if (wroteLastFittingElement) {
-            logStream.write(_logFileHeader, tmpString, cursor);
+            const bool writeSuccesfull =  logStream.write(_logFileHeader, tmpString, cursor);
             memset (tmpString,'\0',sizeof(tmpString));
             cursor = 0;
+
+            setHealthy(true);
         }
+
     }
 }
 
