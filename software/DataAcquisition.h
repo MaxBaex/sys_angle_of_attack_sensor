@@ -3,9 +3,9 @@
 
 #include "AllSensorsELV.h"
 #include "BPS120.h"
-#include "Tca9548a.h"
+#include "DataLogger.h"
 #include "Task.h"
-#include "DataLogging.h"
+#include "Tca9548a.h"
 #include <Wire.h>
 
 constexpr char dataFileHeader[] =
@@ -15,15 +15,11 @@ constexpr char dataFileDataTemplate[] =
 
 class DataAcquisition : public Task {
 
-public:
-
-    DataAcquisition(TickType_t targetPeriod, DataLogging *log):
-        i2cSwitch(&Wire),
-        absPressureSensor(&Wire),
-        diffPressureSensor1(&Wire),
-        diffPressureSensor2(&Wire),
-        logging(log),
-        targetTicks(targetPeriod) {};
+  public:
+    DataAcquisition(TickType_t targetPeriod, DataLogger *log)
+        : i2cSwitch(&Wire), absPressureSensor(&Wire),
+          diffPressureSensor1(&Wire), diffPressureSensor2(&Wire), logging(log),
+          targetTicks(targetPeriod){};
 
     bool begin();
 
@@ -31,8 +27,7 @@ public:
 
     void printStatus() const override;
 
-protected:
-
+  protected:
     void measureOnce();
 
     TCA9548A i2cSwitch;
@@ -40,14 +35,13 @@ protected:
     AllSensorsELVH diffPressureSensor1;
     AllSensorsELVH diffPressureSensor2;
 
-    DataLogging *logging;
+    DataLogger *logging;
 
     const TickType_t targetTicks;
 
-private:
-
+  private:
     void setTemperature(size_t index, float value);
     float getTemperature(size_t index);
 };
 
-#endif //DATA_ACQUISITION_H
+#endif // DATA_ACQUISITION_H

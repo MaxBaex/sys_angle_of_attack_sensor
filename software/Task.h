@@ -4,29 +4,28 @@
 #include <Seeed_Arduino_FreeRTOS.h>
 
 class Task {
-public:
+  public:
     bool begin(const char *taskName, UBaseType_t priority, size_t stackSize);
 
-    bool isHealthy() const {return _healthy;};
+    bool isHealthy() const { return _healthy; };
 
     virtual void printStatus() const {};
 
-protected:
+  protected:
     virtual void run();
 
     void setHealthy(bool healthy);
 
-    static inline unsigned long millisRTOS() {
-        return xTaskGetTickCount() * 1000 / configTICK_RATE_HZ;
-    }
-
-private:
+  private:
     TaskHandle_t taskHandle;
 
     static void runStatic(void *pvParameters);
 
-    volatile bool _healthy {true};
-
+    volatile bool _healthy{true};
 };
+
+static inline unsigned long millisRTOS() {
+    return xTaskGetTickCount() * 1000 / configTICK_RATE_HZ;
+}
 
 #endif // TASKCLASS_H

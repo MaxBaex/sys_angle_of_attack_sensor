@@ -11,7 +11,7 @@ bool StatusIndication::begin() {
 }
 
 static inline void blinkOnce() {
-    digitalWrite(LED_BUILTIN, LED_ON); 
+    digitalWrite(LED_BUILTIN, LED_ON);
     vTaskDelay(pdMS_TO_TICKS(500));
     digitalWrite(LED_BUILTIN, LED_OFF);
     vTaskDelay(pdMS_TO_TICKS(1000));
@@ -24,8 +24,9 @@ static inline void ledOff() {
 
 void StatusIndication::run() {
     for (;;) {
+        Serial.println("Status:");
         bool systemHealthy = true;
-        for (int i=0; i<_taskListLen; i++) {
+        for (int i = 0; i < _taskListLen; i++) {
             _taskList[i]->printStatus();
             systemHealthy &= _taskList[i]->isHealthy();
         }

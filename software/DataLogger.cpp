@@ -1,4 +1,4 @@
-#include "DataLogging.h"
+#include "DataLogger.h"
 #include <SPI.h>
 #include <string.h>
 
@@ -6,9 +6,7 @@
 
 #define STR_CACHE_SIZE 512
 
-static inline const File defectiveFile() {
-    return File();
-}
+static inline const File defectiveFile() { return File(); }
 
 File LoggingStream::openLogFile() {
     const int maxLogNum = LOG_NUM_DIGITS * 10 - 1;
@@ -26,9 +24,15 @@ File LoggingStream::openLogFile() {
 }
 
 bool LoggingStream::begin(const char *logFileHeader) {
-    SD.end();
 
-    if(!SD.begin(SPI_CS_PIN)) {
+    if (restartSDRateThrottle.waitedLongEnough()) {
+        // ensure, that we initialize SD from a cleaned up state
+        SD.end();
+
+        if (!SD.begin(SPI_CS_PIN)) {
+           return false;
+        }
+    } else {
         return false;
     }
 
@@ -36,14 +40,15 @@ bool LoggingStream::begin(const char *logFileHeader) {
 
     if (logFile) {
         const auto dataLen = strlen(logFileHeader);
-        
+
         return _writeImpl(logFileHeader, dataLen);
     } else {
         return false;
     }
 }
 
-bool LoggingStream::write(const char *logFileHeader, const char *data, size_t dataLength) {
+bool LoggingStream::write(const char *logFileHeader, const char *data,
+                          size_t dataLength) {
 
     if (!logFile) {
         if (!begin(logFileHeader)) {
@@ -54,7 +59,7 @@ bool LoggingStream::write(const char *logFileHeader, const char *data, size_t da
     if (logFile) {
 
         return _writeImpl(data, dataLength);
-    } 
+    }
 
     return false;
 }
@@ -73,10 +78,9 @@ bool LoggingStream::_writeImpl(const char *data, size_t dataLength) {
 
         return true;
     }
-
 }
 
-bool DataLogging::begin(UBaseType_t queueLength, UBaseType_t queueItemSize) {
+bool DataLogger::begin(UBaseType_t queueLength, UBaseType_t queueItemSize) {
 
     if (_logFileHeader != NULL) {
         logStream.begin(_logFileHeader);
@@ -84,7 +88,7 @@ bool DataLogging::begin(UBaseType_t queueLength, UBaseType_t queueItemSize) {
         return false;
     }
 
-    loggingQueue = xQueueCreate( queueLength, queueItemSize);
+    loggingQueue = xQueueCreate(queueLength, queueItemSize);
 
     if (loggingQueue == NULL) {
         Serial.println("Could not create logging queue!");
@@ -93,16 +97,17 @@ bool DataLogging::begin(UBaseType_t queueLength, UBaseType_t queueItemSize) {
 
     _queueItemSize = queueItemSize;
 
-    return Task::begin("DataLogging", 2, 350);
+    return Task::begin("DataLogger", 2, 350);
 }
 
-void DataLogging::run() {
+void DataLogger::run() {
 
     char tmpString[STR_CACHE_SIZE] = "";
     size_t cursor = 0;
 
     for (;;) {
-        const auto res = xQueueReceive(loggingQueue, &tmpString[cursor], pdMS_TO_TICKS(1000));
+        const auto res = xQueueReceive(loggingQueue, &tmpString[cursor],
+                                       pdMS_TO_TICKS(1000));
 
         if (res != pdTRUE) {
             setHealthy(false);
@@ -111,21 +116,22 @@ void DataLogging::run() {
 
         cursor += _queueItemSize;
 
-        const bool wroteLastFittingElement = cursor + _queueItemSize > STR_CACHE_SIZE;
+        const bool wroteLastFittingElement =
+            cursor + _queueItemSize > STR_CACHE_SIZE;
 
         if (wroteLastFittingElement) {
-            const bool writeSuccesfull =  logStream.write(_logFileHeader, tmpString, cursor);
-            memset (tmpString,'\0',sizeof(tmpString));
+            const bool writeSuccesfull =
+                logStream.write(_logFileHeader, tmpString, cursor);
+            memset(tmpString, '\0', sizeof(tmpString));
             cursor = 0;
 
             setHealthy(writeSuccesfull);
         }
-
     }
 }
 
-bool DataLogging::storeData(const void *data, size_t dataSize) {
-    
+bool DataLogger::storeData(const void *data, size_t dataSize) {
+
     if (dataSize == _queueItemSize) {
 
         return xQueueSend(loggingQueue, data, 0) == pdTRUE;
@@ -136,9 +142,9 @@ bool DataLogging::storeData(const void *data, size_t dataSize) {
     }
 }
 
-void DataLogging::printStatus() const {
+void DataLogger::printStatus() const {
     if (isHealthy()) {
-        Serial.println("DataLogging is running :)");
+        Serial.println("DataLogger is running :)");
     } else {
         Serial.println("Data logging is not working properly :(");
     }

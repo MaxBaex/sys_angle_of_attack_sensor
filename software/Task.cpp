@@ -3,8 +3,8 @@
 
 bool Task::begin(const char *taskName, UBaseType_t priority, size_t stackSize) {
     const auto res = xTaskCreate(runStatic, taskName, stackSize, this,
-                tskIDLE_PRIORITY + priority, &taskHandle);
-    
+                                 tskIDLE_PRIORITY + priority, &taskHandle);
+
     return res == pdPASS;
 }
 
@@ -15,12 +15,10 @@ void Task::run() {
     }
 }
 
-void Task::setHealthy(bool healthy) {
-        _healthy = healthy;
-}
+void Task::setHealthy(bool healthy) { _healthy = healthy; }
 
 void Task::runStatic(void *pvParameters) {
-    Task *instance = (Task*)pvParameters;
-    
+    Task *instance = (Task *)pvParameters;
+
     instance->run();
 }

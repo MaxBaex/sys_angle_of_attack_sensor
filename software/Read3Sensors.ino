@@ -1,5 +1,5 @@
-#include "DataLogging.h"
 #include "DataAcquisition.h"
+#include "DataLogger.h"
 #include "StatusIndication.h"
 #include <SD.h>
 #include <Seeed_Arduino_FreeRTOS.h>
@@ -9,12 +9,13 @@
 static constexpr size_t queueLen = 10;
 static constexpr size_t msgLen = 80;
 
-DataLogging logging(dataFileHeader);
+DataLogger logging(dataFileHeader);
 DataAcquisition acquisition(pdMS_TO_TICKS(100), &logging);
 
 const Task *tasklist[] = {(Task*)&logging, (Task*)&acquisition};
 
-StatusIndication statusIndicator(tasklist, sizeof(tasklist)/sizeof(tasklist[0]));
+StatusIndication statusIndicator(tasklist,
+                                 sizeof(tasklist) / sizeof(tasklist[0]));
 
 inline void stop(char *err) {
     while (1) {

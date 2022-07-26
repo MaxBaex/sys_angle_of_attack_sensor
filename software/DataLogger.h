@@ -1,9 +1,10 @@
-#ifndef DATALOGGING_H
-#define DATALOGGING_H
+#ifndef DataLogger_H
+#define DataLogger_H
 
 #include "Task.h"
-#include <Seeed_Arduino_FreeRTOS.h>
+#include "RateThrottle.h"
 #include <SD.h>
+#include <Seeed_Arduino_FreeRTOS.h>
 #include <stddef.h>
 
 #define STR1(x) #x
@@ -15,7 +16,9 @@
 #define LOG_FILE_NAME_TEMPLATE ("log%0" STR(LOG_NUM_DIGITS) "d.csv")
 
 class LoggingStream {
-public:
+  public:
+
+    LoggingStream() : restartSDRateThrottle(pdMS_TO_TICKS(2500)) {};
 
     bool begin(const char *logFileHeader);
 
@@ -23,21 +26,22 @@ public:
 
     bool write(const char *logFileHeader, const char *data, size_t dataLength);
 
-private:
-
+  private:
     bool _writeImpl(const char *data, size_t dataLen);
 
     File logFile;
 
     static File openLogFile();
+
+    RateThrottle restartSDRateThrottle;
 };
 
-class DataLogging : public Task {
-public:
+class DataLogger : public Task {
+  public:
+    DataLogger(const char *logFileHeader)
+        : _logFileHeader(logFileHeader) {};
 
-    DataLogging(const char *logFileHeader):_logFileHeader(logFileHeader) {};
-
-    bool begin(UBaseType_t queueLength, UBaseType_t queueItemSize);
+    bool begin(UBaseType_t queueLength, UBaseType_t dataItemBytes);
 
     bool storeData(const void *data, size_t dataSize);
 
@@ -45,15 +49,14 @@ public:
 
     void printStatus() const override;
 
-private:
-
+  private:
     LoggingStream logStream;
 
     QueueHandle_t loggingQueue;
-    
+
     size_t _queueItemSize;
 
     const char *_logFileHeader;
 };
 
-#endif // DATALOGGING_H
+#endif // DataLogger_H

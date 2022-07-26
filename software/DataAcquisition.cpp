@@ -25,7 +25,8 @@ void DataAcquisition::run() {
     while (true) {
         const TickType_t ticksMeasurementStart = xTaskGetTickCount();
         measureOnce();
-        const TickType_t measurementTicks = xTaskGetTickCount() - ticksMeasurementStart;
+        const TickType_t measurementTicks =
+            xTaskGetTickCount() - ticksMeasurementStart;
 
         if (targetTicks > measurementTicks) {
             vTaskDelay(targetTicks - measurementTicks);
