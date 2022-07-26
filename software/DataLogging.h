@@ -43,6 +43,8 @@ public:
 
     void run() override;
 
+    void printStatus() const override;
+
 private:
 
     LoggingStream logStream;

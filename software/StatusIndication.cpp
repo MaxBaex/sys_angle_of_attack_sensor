@@ -19,13 +19,14 @@ static inline void blinkOnce() {
 
 static inline void ledOff() {
     digitalWrite(LED_BUILTIN, LED_OFF);
-    vTaskDelay(1500);
+    vTaskDelay(pdMS_TO_TICKS(1500));
 }
 
 void StatusIndication::run() {
     for (;;) {
         bool systemHealthy = true;
         for (int i=0; i<_taskListLen; i++) {
+            _taskList[i]->printStatus();
             systemHealthy &= _taskList[i]->isHealthy();
         }
 

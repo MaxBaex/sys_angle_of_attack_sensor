@@ -29,6 +29,8 @@ public:
 
     void run() override;
 
+    void printStatus() const override;
+
 protected:
 
     void measureOnce();
@@ -41,6 +43,11 @@ protected:
     DataLogging *logging;
 
     const TickType_t targetTicks;
+
+private:
+
+    void setTemperature(size_t index, float value);
+    float getTemperature(size_t index);
 };
 
 #endif //DATA_ACQUISITION_H

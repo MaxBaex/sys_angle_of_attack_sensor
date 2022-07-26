@@ -77,17 +77,8 @@ void DataAcquisition::measureOnce() {
     snprintf(buffer, 128, dataFileDataTemplate, timeStamp, pressure[0],
              pressure[1], pressure[2], temperature[0], temperature[1]);
     logging->storeData(buffer, strlen(buffer));
+}
 
-    Serial.print("Pressure measurements [mbar]: ");
-    Serial.print(pressure[0], 4);
-    Serial.print(" and ");
-    Serial.print(pressure[1], 4);
-    Serial.print(" and ");
-    Serial.print(pressure[2], 4);
-    Serial.println("");
-    Serial.print("Temperature measurements [°C]: ");
-    Serial.print(temperature[0]);
-    Serial.print(" and ");
-    Serial.print(temperature[1]);
-    Serial.println();
+void DataAcquisition::printStatus() const {
+    Serial.println("Data acquisition is running :)");
 }

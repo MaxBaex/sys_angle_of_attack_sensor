@@ -10,66 +10,6 @@ static inline const File defectiveFile() {
     return File();
 }
 
-bool DataLogging::begin(UBaseType_t queueLength, UBaseType_t queueItemSize) {
-
-    if (_logFileHeader != NULL) {
-        logStream.begin(_logFileHeader);
-    } else {
-        return false;
-    }
-
-    loggingQueue = xQueueCreate( queueLength, queueItemSize);
-
-    if (loggingQueue == NULL) {
-        Serial.println("Could not create logging queue!");
-        return false;
-    }
-
-    _queueItemSize = queueItemSize;
-
-    return Task::begin("DataLogging", 2, 350);
-}
-
-void DataLogging::run() {
-
-    char tmpString[STR_CACHE_SIZE] = "";
-    size_t cursor = 0;
-
-    for (;;) {
-        const auto res = xQueueReceive(loggingQueue, &tmpString[cursor], pdMS_TO_TICKS(1000));
-
-        if (res != pdTRUE) {
-            setHealthy(false);
-            continue;
-        }
-
-        cursor += _queueItemSize;
-
-        const bool wroteLastFittingElement = cursor + _queueItemSize > STR_CACHE_SIZE;
-
-        if (wroteLastFittingElement) {
-            const bool writeSuccesfull =  logStream.write(_logFileHeader, tmpString, cursor);
-            memset (tmpString,'\0',sizeof(tmpString));
-            cursor = 0;
-
-            setHealthy(true);
-        }
-
-    }
-}
-
-bool DataLogging::storeData(const void *data, size_t dataSize) {
-    
-    if (dataSize == _queueItemSize) {
-
-        return xQueueSend(loggingQueue, data, 0) == pdTRUE;
-
-    } else {
-
-        return false;
-    }
-}
-
 File LoggingStream::openLogFile() {
     const int maxLogNum = LOG_NUM_DIGITS * 10 - 1;
     char logFileName[LOG_FILE_NAME_LENGTH];
@@ -134,4 +74,72 @@ bool LoggingStream::_writeImpl(const char *data, size_t dataLength) {
         return true;
     }
 
+}
+
+bool DataLogging::begin(UBaseType_t queueLength, UBaseType_t queueItemSize) {
+
+    if (_logFileHeader != NULL) {
+        logStream.begin(_logFileHeader);
+    } else {
+        return false;
+    }
+
+    loggingQueue = xQueueCreate( queueLength, queueItemSize);
+
+    if (loggingQueue == NULL) {
+        Serial.println("Could not create logging queue!");
+        return false;
+    }
+
+    _queueItemSize = queueItemSize;
+
+    return Task::begin("DataLogging", 2, 350);
+}
+
+void DataLogging::run() {
+
+    char tmpString[STR_CACHE_SIZE] = "";
+    size_t cursor = 0;
+
+    for (;;) {
+        const auto res = xQueueReceive(loggingQueue, &tmpString[cursor], pdMS_TO_TICKS(1000));
+
+        if (res != pdTRUE) {
+            setHealthy(false);
+            continue;
+        }
+
+        cursor += _queueItemSize;
+
+        const bool wroteLastFittingElement = cursor + _queueItemSize > STR_CACHE_SIZE;
+
+        if (wroteLastFittingElement) {
+            const bool writeSuccesfull =  logStream.write(_logFileHeader, tmpString, cursor);
+            memset (tmpString,'\0',sizeof(tmpString));
+            cursor = 0;
+
+            setHealthy(writeSuccesfull);
+        }
+
+    }
+}
+
+bool DataLogging::storeData(const void *data, size_t dataSize) {
+    
+    if (dataSize == _queueItemSize) {
+
+        return xQueueSend(loggingQueue, data, 0) == pdTRUE;
+
+    } else {
+
+        return false;
+    }
+}
+
+void DataLogging::printStatus() const {
+    if (isHealthy()) {
+        Serial.println("DataLogging is running :)");
+    } else {
+        Serial.println("Data logging is not working properly :(");
+    }
 }

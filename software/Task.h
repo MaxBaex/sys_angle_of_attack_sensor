@@ -9,6 +9,8 @@ public:
 
     bool isHealthy() const {return _healthy;};
 
+    virtual void printStatus() const {};
+
 protected:
     virtual void run();
 
