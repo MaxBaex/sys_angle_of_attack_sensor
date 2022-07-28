@@ -1,16 +1,15 @@
 #include "DataAcquisition.h"
 #include "DataLogger.h"
+#include "RTCService.h"
 #include "StatusIndication.h"
 #include <SD.h>
 #include <Seeed_Arduino_FreeRTOS.h>
 #include <cmath>
 #include <cstring>
 
-static constexpr size_t queueLen = 10;
-static constexpr size_t msgLen = 80;
-
 DataLogger logging(dataFileHeader);
 DataAcquisition acquisition(pdMS_TO_TICKS(100), &logging);
+RTCService rtcService(&logging);
 
 const Task *tasklist[] = {(Task*)&logging, (Task*)&acquisition};
 
@@ -34,8 +33,12 @@ void setup() {
         stop("Data acquisition could not be initialized");
     }
 
-    if (!logging.begin(queueLen, msgLen)) {
+    if (!logging.begin()) {
         stop("Data logging could not be initialized");
+    }
+
+    if (!rtcService.begin()) {
+        stop("RTC Service could not be initialized");
     }
 
     statusIndicator.begin();

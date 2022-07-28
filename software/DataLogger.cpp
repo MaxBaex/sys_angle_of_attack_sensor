@@ -4,8 +4,6 @@
 
 #define SPI_CS_PIN 3
 
-#define STR_CACHE_SIZE 512
-
 static inline const File defectiveFile() { return File(); }
 
 File LoggingStream::openLogFile() {
@@ -41,7 +39,7 @@ bool LoggingStream::begin(const char *logFileHeader) {
     if (logFile) {
         const auto dataLen = strlen(logFileHeader);
 
-        return _writeImpl(logFileHeader, dataLen);
+        return _lowLevelWrite(logFileHeader, dataLen);
     } else {
         return false;
     }
@@ -49,6 +47,7 @@ bool LoggingStream::begin(const char *logFileHeader) {
 
 bool LoggingStream::write(const char *logFileHeader, const char *data,
                           size_t dataLength) {
+    
 
     if (!logFile) {
         if (!begin(logFileHeader)) {
@@ -57,17 +56,18 @@ bool LoggingStream::write(const char *logFileHeader, const char *data,
     }
 
     if (logFile) {
-
-        return _writeImpl(data, dataLength);
+        return _lowLevelWrite(data, dataLength);
     }
 
     return false;
 }
 
-bool LoggingStream::_writeImpl(const char *data, size_t dataLength) {
+bool LoggingStream::_lowLevelWrite(const char *data, size_t dataLength) {
     const size_t written = logFile.write(data, dataLength);
 
     if (written != dataLength) {
+
+        logFile.close();
 
         logFile = defectiveFile();
 
@@ -80,7 +80,7 @@ bool LoggingStream::_writeImpl(const char *data, size_t dataLength) {
     }
 }
 
-bool DataLogger::begin(UBaseType_t queueLength, UBaseType_t queueItemSize) {
+bool DataLogger::begin() {
 
     if (_logFileHeader != NULL) {
         logStream.begin(_logFileHeader);
@@ -88,40 +88,36 @@ bool DataLogger::begin(UBaseType_t queueLength, UBaseType_t queueItemSize) {
         return false;
     }
 
-    loggingQueue = xQueueCreate(queueLength, queueItemSize);
+    loggingQueue = xQueueCreate(queueLen, storeQueueItemLen);
 
     if (loggingQueue == NULL) {
         Serial.println("Could not create logging queue!");
         return false;
     }
 
-    _queueItemSize = queueItemSize;
-
-    return Task::begin("DataLogger", 2, 350);
+    return Task::begin("DataLogger", 2, 512);
 }
 
 void DataLogger::run() {
 
-    char tmpString[STR_CACHE_SIZE] = "";
+    char tmpString[itemsWrittenTogehter * storeQueueItemLen] = "";
     size_t cursor = 0;
 
     for (;;) {
         const auto res = xQueueReceive(loggingQueue, &tmpString[cursor],
                                        pdMS_TO_TICKS(1000));
 
-        if (res != pdTRUE) {
-            setHealthy(false);
+
+        if (res == pdTRUE) {
+            cursor += strnlen(&tmpString[cursor], storeQueueItemLen);
+        } else {
             continue;
         }
 
-        cursor += _queueItemSize;
+        const bool tmpStringFull = cursor + storeQueueItemLen > itemsWrittenTogehter * storeQueueItemLen;
 
-        const bool wroteLastFittingElement =
-            cursor + _queueItemSize > STR_CACHE_SIZE;
-
-        if (wroteLastFittingElement) {
-            const bool writeSuccesfull =
-                logStream.write(_logFileHeader, tmpString, cursor);
+        if (tmpStringFull) {
+            const bool writeSuccesfull = logStream.write(_logFileHeader, tmpString, cursor);
             memset(tmpString, '\0', sizeof(tmpString));
             cursor = 0;
 
@@ -130,16 +126,9 @@ void DataLogger::run() {
     }
 }
 
-bool DataLogger::storeData(const void *data, size_t dataSize) {
+bool DataLogger::storeData(const void *data) {
 
-    if (dataSize == _queueItemSize) {
-
-        return xQueueSend(loggingQueue, data, 0) == pdTRUE;
-
-    } else {
-
-        return false;
-    }
+    return xQueueSend(loggingQueue, data, 0) == pdTRUE;
 }
 
 void DataLogger::printStatus() const {

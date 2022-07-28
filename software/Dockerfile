@@ -16,6 +16,9 @@ RUN arduino-cli core install --additional-urls https://files.seeedstudio.com/ard
 # install SD library
 RUN arduino-cli lib install SD
 
+# install RTClib
+RUN arduino-cli lib install RTClib
+
 # ugly patching of Seeeduino's FreeRTOS
 # previous version had a byte alignment issue, causing problems with sprintf
 RUN apt-get install -y unzip

@@ -27,7 +27,7 @@ class LoggingStream {
     bool write(const char *logFileHeader, const char *data, size_t dataLength);
 
   private:
-    bool _writeImpl(const char *data, size_t dataLen);
+    bool _lowLevelWrite(const char *data, size_t dataLen);
 
     File logFile;
 
@@ -38,12 +38,16 @@ class LoggingStream {
 
 class DataLogger : public Task {
   public:
+    static constexpr size_t queueLen = 10;
+    static constexpr size_t storeQueueItemLen = 80;
+    static constexpr size_t itemsWrittenTogehter = 6;
+
     DataLogger(const char *logFileHeader)
         : _logFileHeader(logFileHeader) {};
 
-    bool begin(UBaseType_t queueLength, UBaseType_t dataItemBytes);
+    bool begin();
 
-    bool storeData(const void *data, size_t dataSize);
+    bool storeData(const void *data);
 
     void run() override;
 

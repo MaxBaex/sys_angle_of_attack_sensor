@@ -43,11 +43,14 @@ void DataAcquisition::measureOnce() {
     float temperature[2];
 
     // Read raw pressure values from sensors at hardware I2C
+    // TODO: replace Critical Section with appropriate solution, is used to guard i2c access
+    taskENTER_CRITICAL();
     i2cSwitch.selectChannel(1);
     absPressureSensor.fetchSensorValues();
     diffPressureSensor1.fetchPressureAndTempValues();
     i2cSwitch.selectChannel(2);
     diffPressureSensor2.fetchPressureAndTempValues();
+    taskEXIT_CRITICAL();
 
     // convert the Raw pressures and temperatures to pressure values in mbar and
     // temperature values in °C
@@ -74,10 +77,10 @@ void DataAcquisition::measureOnce() {
          51.552699387) /
         1.06687116;
 
-    char buffer[128] = "";
-    snprintf(buffer, 128, dataFileDataTemplate, timeStamp, pressure[0],
+    char buffer[DataLogger::storeQueueItemLen] = "";
+    snprintf(buffer, DataLogger::storeQueueItemLen, dataFileDataTemplate, timeStamp, pressure[0],
              pressure[1], pressure[2], temperature[0], temperature[1]);
-    logging->storeData(buffer, strlen(buffer));
+    logging->storeData(buffer);
 }
 
 void DataAcquisition::printStatus() const {

@@ -11,7 +11,7 @@
 constexpr char dataFileHeader[] =
     "timeStamp, absolutePressure, diffPressure1, diffPressure2, temp1, temp2\n";
 constexpr char dataFileDataTemplate[] =
-    "% 10lu % 1.5e, % 1.5e, % 1.5e, % 1.5e, % 1.5e\n";
+    "% 9lu % 1.5e, % 1.5e, % 1.5e, % 1.5e, % 1.5e\n";
 
 class DataAcquisition : public Task {
 
