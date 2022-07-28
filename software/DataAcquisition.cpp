@@ -43,7 +43,8 @@ void DataAcquisition::measureOnce() {
     float temperature[2];
 
     // Read raw pressure values from sensors at hardware I2C
-    // TODO: replace Critical Section with appropriate solution, is used to guard i2c access
+    // TODO: replace Critical Section with appropriate solution, is used to
+    // guard i2c access
     taskENTER_CRITICAL();
     i2cSwitch.selectChannel(1);
     absPressureSensor.fetchSensorValues();
@@ -78,8 +79,9 @@ void DataAcquisition::measureOnce() {
         1.06687116;
 
     char buffer[DataLogger::storeQueueItemLen] = "";
-    snprintf(buffer, DataLogger::storeQueueItemLen, dataFileDataTemplate, timeStamp, pressure[0],
-             pressure[1], pressure[2], temperature[0], temperature[1]);
+    snprintf(buffer, DataLogger::storeQueueItemLen, dataFileDataTemplate,
+             timeStamp, pressure[0], pressure[1], pressure[2], temperature[0],
+             temperature[1]);
     logging->storeData(buffer);
 }
 

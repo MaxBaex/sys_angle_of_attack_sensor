@@ -14,8 +14,8 @@ class RTCService : public Task {
     void run() override;
 
   private:
-
-    static void buildLogString(char *buffer, size_t bufferSize, DateTime *now, unsigned int timeStamp);
+    static void buildLogString(char *buffer, size_t bufferSize, DateTime *now,
+                               unsigned int timeStamp);
 
     RTC_PCF8523 rtc;
 

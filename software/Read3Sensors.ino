@@ -11,7 +11,7 @@ DataLogger logging(dataFileHeader);
 DataAcquisition acquisition(pdMS_TO_TICKS(100), &logging);
 RTCService rtcService(&logging);
 
-const Task *tasklist[] = {(Task*)&logging, (Task*)&acquisition};
+const Task *tasklist[] = {(Task *)&logging, (Task *)&acquisition};
 
 StatusIndication statusIndicator(tasklist,
                                  sizeof(tasklist) / sizeof(tasklist[0]));

@@ -28,7 +28,7 @@ bool LoggingStream::begin(const char *logFileHeader) {
         SD.end();
 
         if (!SD.begin(SPI_CS_PIN)) {
-           return false;
+            return false;
         }
     } else {
         return false;
@@ -47,7 +47,6 @@ bool LoggingStream::begin(const char *logFileHeader) {
 
 bool LoggingStream::write(const char *logFileHeader, const char *data,
                           size_t dataLength) {
-    
 
     if (!logFile) {
         if (!begin(logFileHeader)) {
@@ -107,17 +106,18 @@ void DataLogger::run() {
         const auto res = xQueueReceive(loggingQueue, &tmpString[cursor],
                                        pdMS_TO_TICKS(1000));
 
-
         if (res == pdTRUE) {
             cursor += strnlen(&tmpString[cursor], storeQueueItemLen);
         } else {
             continue;
         }
 
-        const bool tmpStringFull = cursor + storeQueueItemLen > itemsWrittenTogehter * storeQueueItemLen;
+        const bool tmpStringFull = cursor + storeQueueItemLen >
+                                   itemsWrittenTogehter * storeQueueItemLen;
 
         if (tmpStringFull) {
-            const bool writeSuccesfull = logStream.write(_logFileHeader, tmpString, cursor);
+            const bool writeSuccesfull =
+                logStream.write(_logFileHeader, tmpString, cursor);
             memset(tmpString, '\0', sizeof(tmpString));
             cursor = 0;
 

@@ -17,7 +17,7 @@ bool RateThrottle::waitedLongEnough() {
 
     } else {
         lastTryTimeStamp = millisRTOS();
-        
+
         initialized = true;
 
         return true;

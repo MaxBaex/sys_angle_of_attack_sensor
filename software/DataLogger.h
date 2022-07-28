@@ -1,8 +1,8 @@
 #ifndef DataLogger_H
 #define DataLogger_H
 
-#include "Task.h"
 #include "RateThrottle.h"
+#include "Task.h"
 #include <SD.h>
 #include <Seeed_Arduino_FreeRTOS.h>
 #include <stddef.h>
@@ -17,8 +17,7 @@
 
 class LoggingStream {
   public:
-
-    LoggingStream() : restartSDRateThrottle(pdMS_TO_TICKS(2500)) {};
+    LoggingStream() : restartSDRateThrottle(pdMS_TO_TICKS(2500)){};
 
     bool begin(const char *logFileHeader);
 
@@ -42,8 +41,7 @@ class DataLogger : public Task {
     static constexpr size_t storeQueueItemLen = 80;
     static constexpr size_t itemsWrittenTogehter = 6;
 
-    DataLogger(const char *logFileHeader)
-        : _logFileHeader(logFileHeader) {};
+    DataLogger(const char *logFileHeader) : _logFileHeader(logFileHeader){};
 
     bool begin();
 

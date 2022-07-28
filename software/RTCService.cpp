@@ -18,10 +18,12 @@ bool RTCService::begin() {
     return Task::begin("RTCService", 1, 256);
 }
 
-void RTCService::buildLogString(char *buffer, size_t bufferSize, DateTime *now, unsigned int timeStamp) {
+void RTCService::buildLogString(char *buffer, size_t bufferSize, DateTime *now,
+                                unsigned int timeStamp) {
 
-    snprintf(buffer, bufferSize, "% 9u, %04u-%02u-%02u %02u:%02u:%02u\n", timeStamp, now->year(), now->month(), now->day(), now->hour(), now->minute(), now->second());
-
+    snprintf(buffer, bufferSize, "% 9u, %04u-%02u-%02u %02u:%02u:%02u\n",
+             timeStamp, now->year(), now->month(), now->day(), now->hour(),
+             now->minute(), now->second());
 }
 
 void RTCService::run() {

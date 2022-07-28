@@ -2,14 +2,12 @@
 #define RATE_THROTTLE_H
 
 class RateThrottle {
-public:
-
+  public:
     RateThrottle(unsigned long minPeriod) : _minPeriod(minPeriod){};
 
     bool waitedLongEnough();
 
   private:
-
     const unsigned long _minPeriod;
 
     unsigned long lastTryTimeStamp;
