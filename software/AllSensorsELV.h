@@ -1,3 +1,7 @@
+/**
+ * @file AllSensorsELV.h
+ * @brief Driver for ELVH pressure sensors
+ */
 #ifndef ALLSENSORS_ELV_H
 #define ALLSENSORS_ELV_H
 

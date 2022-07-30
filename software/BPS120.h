@@ -1,3 +1,7 @@
+/**
+ * @file BPS120.h
+ * @brief Driver for some pressure sensor
+ */
 #ifndef BPS120_H
 #define BPS120_H
 

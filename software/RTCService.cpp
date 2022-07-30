@@ -40,6 +40,6 @@ void RTCService::run() {
 
         logging->storeData(buffer);
 
-        vTaskDelay(pdMS_TO_TICKS(500));
+        vTaskDelay(pdMS_TO_TICKS(_intervalMilliSec));
     }
 }

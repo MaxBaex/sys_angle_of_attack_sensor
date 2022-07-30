@@ -1,3 +1,7 @@
+/**
+ * @file DataAcquisition.h
+ * @brief Task collecting sensor measurements (pressure and temperature)
+ */
 #ifndef DATA_ACQUISITION_H
 #define DATA_ACQUISITION_H
 
@@ -16,10 +20,13 @@ constexpr char dataFileDataTemplate[] =
 class DataAcquisition : public Task {
 
   public:
-    DataAcquisition(TickType_t targetPeriod, DataLogger *log)
+    DataAcquisition(DataLogger *log, size_t intervalMilliSec)
         : i2cSwitch(&Wire), absPressureSensor(&Wire),
           diffPressureSensor1(&Wire), diffPressureSensor2(&Wire), logging(log),
-          targetTicks(targetPeriod){};
+          _intervalTicks(pdMS_TO_TICKS(intervalMilliSec))
+    {
+      
+    };
 
     bool begin();
 
@@ -37,7 +44,7 @@ class DataAcquisition : public Task {
 
     DataLogger *logging;
 
-    const TickType_t targetTicks;
+    const TickType_t _intervalTicks;
 
   private:
     void setTemperature(size_t index, float value);

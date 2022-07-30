@@ -1,3 +1,7 @@
+/**
+ * @file Task.h
+ * @brief Abstraction layer on top of RTOS tasks.
+ */
 #ifndef TASKCLASS_H
 #define TASKCLASS_H
 

@@ -1,3 +1,7 @@
+/**
+ * @file StatusIndication.h
+ * @brief Task collecting system status, to adapt blinking pattern and print status to console.
+ */
 #ifndef STATUS_INDICATION_H
 #define STATUS_INDICATION_H
 

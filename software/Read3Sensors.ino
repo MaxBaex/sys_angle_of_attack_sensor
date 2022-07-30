@@ -1,14 +1,15 @@
+/**
+ * @file Read3Sensors.ino
+ * @brief main sketch file for project
+ */
 #include "DataAcquisition.h"
 #include "DataLogger.h"
 #include "RTCService.h"
 #include "StatusIndication.h"
-#include <SD.h>
 #include <Seeed_Arduino_FreeRTOS.h>
-#include <cmath>
-#include <cstring>
 
 DataLogger logging(dataFileHeader);
-DataAcquisition acquisition(pdMS_TO_TICKS(100), &logging);
+DataAcquisition acquisition(&logging, 100);
 RTCService rtcService(&logging);
 
 const Task *tasklist[] = {(Task *)&logging, (Task *)&acquisition};
@@ -46,4 +47,6 @@ void setup() {
     vTaskStartScheduler();
 }
 
+// Loop should be never reached,
+// as scheduling is started within setup
 void loop() {}

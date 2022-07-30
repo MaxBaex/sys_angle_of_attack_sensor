@@ -28,8 +28,8 @@ void DataAcquisition::run() {
         const TickType_t measurementTicks =
             xTaskGetTickCount() - ticksMeasurementStart;
 
-        if (targetTicks > measurementTicks) {
-            vTaskDelay(targetTicks - measurementTicks);
+        if (_intervalTicks > measurementTicks) {
+            vTaskDelay(_intervalTicks - measurementTicks);
         }
     }
 }

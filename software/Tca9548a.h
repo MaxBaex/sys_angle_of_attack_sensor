@@ -1,3 +1,7 @@
+/**
+ * @file Tca9548.h
+ * @brief Driver for I2C switch.
+ */
 #ifndef TCA9548A_H
 #define TCA9548A_H
 

@@ -1,3 +1,7 @@
+/**
+ * @file RateThrottle.h
+ * @brief Utility to limit the rate of some particular code.
+ */
 #ifndef RATE_THROTTLE_H
 #define RATE_THROTTLE_H
 

@@ -1,3 +1,7 @@
+/**
+ * @file DataLogger.h
+ * @brief Task writing items from queue filled by other tasks into file on sd card
+ */
 #ifndef DataLogger_H
 #define DataLogger_H
 
